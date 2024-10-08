@@ -6,8 +6,14 @@ var GAMER = 'GAMER';
 var GAMER_IMG = '<img src="img/gamer.png" />';
 var BALL_IMG = '<img src="img/ball.png" />';
 
+const ballsCaughtDiv = document.getElementsByClassName('ballsCaught')[0];
+
 var gBoard;
 var gGamerPos;
+var ballsCaught = 0;
+var activeBalls = 2;
+
+
 function initGame() {
 	gGamerPos = { i: 2, j: 9 };
 	gBoard = buildBoard();
@@ -101,6 +107,12 @@ function moveTo(i, j) {
 
 		if (targetCell.gameElement === BALL) {
 			console.log('Collecting!');
+			ballsCaught++;
+			ballsCaughtDiv.innerHTML = ballsCaught;
+			if (ballsCaught === activeBalls) {
+                alert('YOU WON!');
+                initGame();
+            }
 		}
 
 		// MOVING from current position
@@ -160,3 +172,6 @@ function getClassName(location) {
 	return cellClass;
 }
 
+function addBall(){
+	
+}
