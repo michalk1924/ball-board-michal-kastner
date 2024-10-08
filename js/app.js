@@ -2,6 +2,7 @@ var WALL = 'WALL';
 var FLOOR = 'FLOOR';
 var BALL = 'BALL';
 var GAMER = 'GAMER';
+var TRANSITION = 'TRANSITION';
 
 var GAMER_IMG = '<img src="img/gamer.png" />';
 var BALL_IMG = '<img src="img/ball.png" />';
@@ -10,14 +11,19 @@ const ballsCaughtDiv = document.getElementsByClassName('ballsCaught')[0];
 
 var gBoard;
 var gGamerPos;
-var ballsCaught = 0;
-var activeBalls = 2;
+var ballsCaught;
+var activeBalls;
 
+var addBallInterval;
 
 function initGame() {
+	activeBalls = 2;
+	ballsCaught = 0;
+	ballsCaughtDiv.innerHTML = ballsCaught;
 	gGamerPos = { i: 2, j: 9 };
 	gBoard = buildBoard();
 	renderBoard(gBoard);
+	addBallInterval = setInterval(addBall, 3000);
 }
 
 
@@ -40,6 +46,12 @@ function buildBoard() {
 				cell.type = WALL;
 			}
 
+			// Place Transition at specific position (7,0) and (7,11)
+			if (i == 7 && (j == 0 || j == board[0].length - 1)) {
+				cell.type = TRANSITION;
+				// cell.gameElement = null;
+			}
+
 			// Add created cell to The game board
 			board[i][j] = cell;
 		}
@@ -53,6 +65,7 @@ function buildBoard() {
 	board[7][4].gameElement = BALL;
 
 	console.log(board);
+
 	return board;
 }
 
@@ -70,6 +83,7 @@ function renderBoard(board) {
 			// TODO - change to short if statement
 			if (currCell.type === FLOOR) cellClass += ' floor';
 			else if (currCell.type === WALL) cellClass += ' wall';
+			else if (currCell.type === TRANSITION) cellClass += ' transition';
 
 			//TODO - Change To ES6 template string
 			strHTML += '\t<td class="cell ' + cellClass + '"  onclick="moveTo(' + i + ',' + j + ')" >\n';
@@ -103,16 +117,16 @@ function moveTo(i, j) {
 	var jAbsDiff = Math.abs(j - gGamerPos.j);
 
 	// If the clicked Cell is one of the four allowed
-	if ((iAbsDiff === 1 && jAbsDiff === 0) || (jAbsDiff === 1 && iAbsDiff === 0)) {
+	if ((iAbsDiff === 1 && jAbsDiff === 0) || (jAbsDiff === 1 && iAbsDiff === 0) || targetCell.type === TRANSITION) {
 
 		if (targetCell.gameElement === BALL) {
 			console.log('Collecting!');
+			activeBalls--;
 			ballsCaught++;
 			ballsCaughtDiv.innerHTML = ballsCaught;
-			if (ballsCaught === activeBalls) {
-                alert('YOU WON!');
-                initGame();
-            }
+			if (activeBalls === 0) {
+				win();
+			}
 		}
 
 		// MOVING from current position
@@ -120,6 +134,19 @@ function moveTo(i, j) {
 		gBoard[gGamerPos.i][gGamerPos.j].gameElement = null;
 		// Dom:
 		renderCell(gGamerPos, '');
+
+		if (targetCell.type === TRANSITION) {
+			debugger
+			gGamerPos.i = i;
+			if (j === gBoard[0].length - 1) {
+				gGamerPos.j = 1;
+			} else {
+				gGamerPos.j = gBoard[0].length - 2;
+			}
+			gBoard[gGamerPos.i][gGamerPos.j].gameElement = GAMER;
+			renderCell(gGamerPos, GAMER_IMG);
+			return;
+		}
 
 		// MOVING to selected position
 		// Model:
@@ -172,6 +199,19 @@ function getClassName(location) {
 	return cellClass;
 }
 
-function addBall(){
-	
+function addBall() {
+	let i = Math.floor(Math.random() * (gBoard.length - 2) + 1);
+	let j = Math.floor(Math.random() * (gBoard[0].length - 2) + 1);
+	gBoard[i][j].gameElement = BALL;
+	activeBalls++;
+	renderBoard(gBoard);
+}
+
+function win() {
+	alert('YOU WON!');
+	clearInterval(addBallInterval);
+}
+
+function restart() {
+	initGame();
 }

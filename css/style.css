@@ -4,3 +4,4 @@ body {background-color: black; color:white}
 .cell img {width:25px; height:auto}
 .floor {background-color: gray}
 .wall {background-color: rgb(118, 42, 165)}
+.transition {background-color:rgb(203, 165, 226)};
